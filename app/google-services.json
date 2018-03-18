@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "286025009005",
+    "firebase_url": "https://blight-c675c.firebaseio.com",
+    "project_id": "blight-c675c",
+    "storage_bucket": "blight-c675c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:286025009005:android:26a0b4c0bf89042f",
+        "android_client_info": {
+          "package_name": "com.sada.blight"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "286025009005-a8ot4e2tjnmiihhkjdpv37sdr6onttib.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sada.blight",
+            "certificate_hash": "e2c7cdcc3574188b9e09d9293e7f2b3d37f52b2d"
+          }
+        },
+        {
+          "client_id": "286025009005-cj7s3ki832326v6r8dbincvvuie4t1gd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz-r7-AMqTHTNSaZ4_Ad-r0wi0JPXrXGA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "286025009005-cj7s3ki832326v6r8dbincvvuie4t1gd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
