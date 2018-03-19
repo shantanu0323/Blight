@@ -45,7 +45,8 @@ public class HomeActivity extends AppCompatActivity {
             try {
                 List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
 //                Toast.makeText(getApplicationContext(), "" + (addresses.get(0).getAddressLine(0) == null), Toast.LENGTH_SHORT).show();
-                location = addresses.get(0).getAddressLine(0);
+                Address obj = addresses.get(0);//.getAddressLine(0);
+                location = obj.getLocality();
                 Toast.makeText(getApplicationContext(), location, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
                 intent.putExtra("lat", lat);

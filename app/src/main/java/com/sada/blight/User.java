@@ -14,10 +14,38 @@ public class User {
     private String profile_pic;
     private String password;
 
+    public String getLat() {
+        return lat;
+    }
+
+    public void setLat(String lat) {
+        this.lat = lat;
+    }
+
+    public String getLon() {
+        return lon;
+    }
+
+    public void setLon(String lon) {
+        this.lon = lon;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    private String lat;
+    private String lon;
+    private String location;
+
     public User() {
     }
 
-    public User(String name, String email, String bloodgroup, String contact, String emergency_contact, String device_token, String profile_pic, String password) {
+    public User(String name, String email, String bloodgroup, String contact, String emergency_contact, String device_token, String profile_pic, String password, String lat, String lon, String location) {
         this.name = name;
         this.email = email;
         this.bloodgroup = bloodgroup;
@@ -26,6 +54,9 @@ public class User {
         this.device_token = device_token;
         this.profile_pic = profile_pic;
         this.password = password;
+        this.lat = lat;
+        this.lon = lon;
+        this.location = location;
     }
 
     public String getName() {

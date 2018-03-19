@@ -2,6 +2,8 @@ package com.sada.blight;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,7 +32,10 @@ import com.google.firebase.storage.UploadTask;
 //import com.theartofdev.edmodo.cropper.CropImage;
 //import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 public class RegistrationActivity extends AppCompatActivity {
 
@@ -40,8 +46,12 @@ public class RegistrationActivity extends AppCompatActivity {
     private EditText etName, etEmail, etBloodgroup, etContact, etEmergencyContact, etPassword;
     private ImageButton bAddImage;
     private Button bRegister;
+    private TextView tvLocation;
     private static ProgressDialog progressDialog;
     private Uri uri = null;
+    private double lat = 0.0d;
+    private double lon = 0.0d;
+    private String location = "random";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +59,32 @@ public class RegistrationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_registration);
 
         findViews();
+
+        GPSTracker gps = new GPSTracker(RegistrationActivity.this);
+        if (gps.canGetLocation()) {
+            String output = "";
+            lat = gps.getLatitude();
+            lon = gps.getLongitude();
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            location = "";
+            try {
+                List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
+//                Toast.makeText(getApplicationContext(), "" + (addresses.get(0).getAddressLine(0) == null), Toast.LENGTH_SHORT).show();
+                Address obj = addresses.get(0);//.getAddressLine(0);
+                location = obj.getLocality();
+
+                Toast.makeText(getApplicationContext(), location, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                intent.putExtra("lat", lat);
+                intent.putExtra("lon", lon);
+                intent.putExtra("location", location);
+                tvLocation.setText(location);
+//                startActivity(intent);
+//                finish();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         bAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -69,7 +105,10 @@ public class RegistrationActivity extends AppCompatActivity {
                             etEmergencyContact.getText().toString().trim(),
                             deviceToken,
                             DEFAULT_IMAGE_URL,
-                            etPassword.getText().toString().trim());
+                            etPassword.getText().toString().trim(),
+                            "" + lat,
+                            "" + lon,
+                            location);
                 } catch (Exception e) {
                     Log.e(TAG, "onClick: ", e);
                     Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -214,6 +253,9 @@ public class RegistrationActivity extends AppCompatActivity {
                                 userMap.put("emergency_contact", user.getEmergency_contact());
                                 userMap.put("device_token", user.getDevice_token());
                                 userMap.put("profile_pic", user.getProfile_pic());
+                                userMap.put("lat", user.getLat());
+                                userMap.put("lon", user.getLon());
+                                userMap.put("location", user.getLocation());
 
                                 currentUser.setValue(userMap);
                                 progressDialog.dismiss();
@@ -285,6 +327,7 @@ public class RegistrationActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         bAddImage = findViewById(R.id.bAddImage);
         bRegister = findViewById(R.id.bRegister);
+        tvLocation = findViewById(R.id.tvLocation);
         progressDialog = new ProgressDialog(this);
     }
 }

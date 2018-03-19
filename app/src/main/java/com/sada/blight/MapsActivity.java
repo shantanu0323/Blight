@@ -1,8 +1,11 @@
 package com.sada.blight;
 
+import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -11,6 +14,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -19,6 +23,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String location;
     private double lat;
     private double lon;
+    private FirebaseAuth mAuth;
 
 
     @Override
@@ -33,6 +38,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         location = getIntent().getStringExtra("location");
         lat = getIntent().getDoubleExtra("lat", 0.0d);
         lon = getIntent().getDoubleExtra("lon", 0.0d);
+
+        mAuth = FirebaseAuth.getInstance();
+        ((FloatingActionButton) findViewById(R.id.bLogout)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuth.signOut();
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                finish();
+            }
+        });
+
 
     }
 
