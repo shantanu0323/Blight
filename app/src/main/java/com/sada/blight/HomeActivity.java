@@ -16,6 +16,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,10 +29,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<String> {
 
@@ -47,7 +56,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private TextView tvTemp, tvPressure, tvVisibility, tvWind, tvHumidity;
     private LinearLayout dataContainer;
-
+    private boolean showAlert = false;
+    private LinearLayout alertContainer;
+    private Animation blinkAnimation;
+    private String alertTitle;
+    private String alertMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +68,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_home);
 
         findViews();
+
+        showAlert = getIntent().getBooleanExtra("showAlert", false);
+        if (showAlert) {
+            operationAlert();
+        }
         ((FloatingActionButton) findViewById(R.id.bLogout)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -95,7 +113,20 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void operationAlert() {
+        alertTitle = getIntent().getStringExtra("title");
+        alertTitle = alertTitle.substring(5);
+        alertMessage = getIntent().getStringExtra("message");
+        ((TextView) findViewById(R.id.tvAlertTitle)).setText(alertTitle);
+        ((TextView) findViewById(R.id.tvAlertMessage)).setText(alertMessage);
+
+        alertContainer.setVisibility(View.VISIBLE);
+        blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
+        alertContainer.startAnimation(blinkAnimation);
+    }
+
     private void findViews() {
+        alertContainer = findViewById(R.id.alertContainer);
         tvTemp = findViewById(R.id.tvTemp);
         tvPressure = findViewById(R.id.tvPressure);
         tvWind = findViewById(R.id.tvWind);
@@ -130,6 +161,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(getApplicationContext(), "No Internet Connection available", Toast.LENGTH_SHORT).show();
         }
     }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -142,6 +174,20 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+        DatabaseReference rescueWorkers = FirebaseDatabase.getInstance().getReference().child("rescueworkers");
+        rescueWorkers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, Object> td = (HashMap<String,Object>) dataSnapshot.getValue();
+                
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         // Add a marker in Sydney and move the camera
