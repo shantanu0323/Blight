@@ -173,11 +173,15 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         WeatherData weatherData = new WeatherData();
         weatherData = QueryUtils.extractFeatureFromJson(data);
 //        Toast.makeText(getApplicationContext(), "" + weatherData.getForPD3(), Toast.LENGTH_SHORT).show();
-        tvTemp.setText(weatherData.getTemp() + " deg C");
-        tvPressure.setText(weatherData.getPressure() + "millibars");
-        tvHumidity.setText(weatherData.getHumidity() + "");
-        tvVisibility.setText(weatherData.getVisibility() + " km");
-        tvWind.setText(weatherData.getWind() + "km/hr");
+        try {
+            tvTemp.setText(weatherData.getTemp() + " deg C");
+            tvPressure.setText(weatherData.getPressure() + "millibars");
+            tvHumidity.setText(weatherData.getHumidity() + "");
+            tvVisibility.setText(weatherData.getVisibility() + " km");
+            tvWind.setText(weatherData.getWind() + "km/hr");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         dataContainer.setVisibility(View.VISIBLE);
     }
 
