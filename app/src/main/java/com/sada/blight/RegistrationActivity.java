@@ -151,6 +151,7 @@ public class RegistrationActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_REQUEST && resultCode == RESULT_OK) {
             uri = data.getData();
+            bAddImage.setImageURI(uri);
             // start picker to get image for cropping and then use the image in cropping activity
 //            CropImage.activity(uri)
 //                    .setGuidelines(CropImageView.Guidelines.ON)
