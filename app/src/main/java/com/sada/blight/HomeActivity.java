@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -73,7 +75,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (showAlert) {
             operationAlert();
         }
-        ((FloatingActionButton) findViewById(R.id.bLogout)).setOnClickListener(new View.OnClickListener() {
+        ((ImageButton) findViewById(R.id.bLogout)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mAuth.signOut();
@@ -109,6 +111,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                finish();
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -131,7 +135,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         tvPressure = findViewById(R.id.tvPressure);
         tvWind = findViewById(R.id.tvWind);
         tvHumidity = findViewById(R.id.tvHumidity);
-        tvVisibility = findViewById(R.id.tvVisibilty);
+        tvVisibility = findViewById(R.id.tvVisibility);
         dataContainer = findViewById(R.id.dataContainer);
     }
 
@@ -175,12 +179,22 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
+        final List<HashMap<String, String>> result = new ArrayList<HashMap<String, String>>();
+
         DatabaseReference rescueWorkers = FirebaseDatabase.getInstance().getReference().child("rescueworkers");
         rescueWorkers.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Map<String, Object> td = (HashMap<String,Object>) dataSnapshot.getValue();
-                
+//                Map<String, HashMap<String, String>> td = (HashMap<String, HashMap<String, String>>) dataSnapshot.getValue();
+//                List<HashMap<String, String>> objectList = (List<HashMap<String, String>>) td.values();
+//                for (HashMap<String, String> obj : objectList) {
+//                    String rescueLot = obj.get("lat");
+//                    String rescueLon = obj.get("lon");
+//                    String region = obj.get("region");
+//                    if (region.equals(location)) {
+//
+//                    }
+//                }
             }
 
             @Override
@@ -195,11 +209,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
         position = new LatLng(lat - 0.001d, lon - 0.001);
         mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
-        position = new LatLng(lat + 0.002d, lon + 0.0015);
+        position = new LatLng(lat + 0.003d, lon + 0.0015);
         mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
-        position = new LatLng(lat - 0.0008d, lon - 0.0008);
+        position = new LatLng(lat - 0.004d, lon - 0.006);
         mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
-        position = new LatLng(lat + 0.0007d, lon - 0.0007);
+        position = new LatLng(lat + 0.001d, lon + 0.003);
         mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15.0f));
@@ -220,11 +234,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         weatherData = QueryUtils.extractFeatureFromJson(data);
 //        Toast.makeText(getApplicationContext(), "" + weatherData.getForPD3(), Toast.LENGTH_SHORT).show();
         try {
-            tvTemp.setText(weatherData.getTemp() + " deg C");
-            tvPressure.setText(weatherData.getPressure() + "millibars");
-            tvHumidity.setText(weatherData.getHumidity() + "");
-            tvVisibility.setText(weatherData.getVisibility() + " km");
-            tvWind.setText(weatherData.getWind() + "km/hr");
+            tvTemp.setText((weatherData.getTemp().toString().substring(0,2)));
+            tvPressure.setText(weatherData.getPressure().toString().substring(0,4));
+            tvHumidity.setText(weatherData.getHumidity().toString().substring(0,3));
+            tvVisibility.setText(weatherData.getVisibility().toString().substring(0,3));
+            tvWind.setText(weatherData.getWind().toString().substring(0,3));
         } catch (Exception e) {
             e.printStackTrace();
         }

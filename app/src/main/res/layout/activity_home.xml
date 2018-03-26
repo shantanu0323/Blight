@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_home"
     tools:context="com.sada.blight.HomeActivity">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -19,15 +20,15 @@
         tools:context="com.sada.blight.MapsActivity" />
 
     <LinearLayout
-        android:orientation="vertical"
         android:id="@+id/alertContainer"
-        android:padding="20dp"
-        android:visibility="gone"
-        android:gravity="center"
-        android:elevation="5dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#d00"
+        android:elevation="5dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -35,21 +36,22 @@
 
         <TextView
             android:id="@+id/tvAlertTitle"
-            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ALERT !!!"
+            android:textColor="#fff"
             android:textSize="40sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ALERT !!!"
-            android:textColor="#fff" />
+            android:textStyle="bold" />
+
         <TextView
-            android:layout_marginTop="20dp"
             android:id="@+id/tvAlertMessage"
-            android:textStyle="bold"
-            android:textSize="24sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:text="ALERT !!!"
-            android:textColor="#fff" />
+            android:textColor="#fff"
+            android:textSize="24sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <ScrollView
@@ -68,75 +70,230 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/tvTemp"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="#b2ebf2"
                     android:gravity="center"
-                    android:text="32.00 deg C"
-                    android:textSize="24sp" />
+                    android:text="32"
+                    android:textColor="#fff"
+                    android:textSize="150sp"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvPressure"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="#f8bbd0"
-                    android:gravity="center"
-                    android:text="1011 millibars"
-                    android:textSize="22sp" />
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1.5"
+                            android:paddingStart="30dp"
+                            android:paddingTop="5dp"
+                            android:text="Pressure"
+                            android:textColor="#0f7"
+                            android:textSize="22sp" />
+
+                        <LinearLayout
+                            android:layout_weight="1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/tvPressure"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="1011"
+                                android:textColor="#ccc"
+                                android:textSize="40sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:text="mbs"
+                                android:gravity="bottom"
+                                android:paddingBottom="10dp"
+                                android:textSize="18sp"
+                                android:layout_weight="3"
+                                android:textColor="#888"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1.5"
+                            android:paddingStart="30dp"
+                            android:paddingTop="5dp"
+                            android:text="Humidity"
+                            android:textColor="#0f7"
+                            android:textSize="22sp" />
+
+                        <LinearLayout
+                            android:layout_weight="1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/tvHumidity"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="0.65"
+                                android:textColor="#ccc"
+                                android:textSize="40sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:text="out of 1"
+                                android:gravity="bottom"
+                                android:paddingBottom="10dp"
+                                android:textSize="18sp"
+                                android:layout_weight="3"
+                                android:textColor="#888"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/tvHumidity"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="#fff59d"
-                    android:gravity="center"
-                    android:text="0.49"
-                    android:textSize="22sp" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvVisibilty"
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.5"
+                        android:paddingStart="30dp"
+                        android:paddingTop="5dp"
+                        android:text="Visibility"
+                        android:textColor="#0f7"
+                        android:textSize="22sp" />
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/tvVisibility"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="1011"
+                            android:textColor="#ccc"
+                            android:textSize="40sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="km"
+                            android:gravity="bottom"
+                            android:paddingBottom="10dp"
+                            android:textSize="18sp"
+                            android:layout_weight="3"
+                            android:textColor="#888"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="#d7ccc8"
-                    android:gravity="center"
-                    android:text="8.00 km"
-                    android:textSize="22sp" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvWind"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="#c5e1a5"
-                    android:gravity="center"
-                    android:text="18.23 km/hr"
-                    android:textSize="22sp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1.5"
+                        android:paddingStart="30dp"
+                        android:paddingTop="5dp"
+                        android:text="Wind"
+                        android:textColor="#0f7"
+                        android:textSize="22sp" />
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/tvWind"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="1011"
+                            android:textColor="#ccc"
+                            android:textSize="40sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="km / hr"
+                            android:gravity="bottom"
+                            android:paddingBottom="10dp"
+                            android:textSize="18sp"
+                            android:layout_weight="3"
+                            android:textColor="#888"/>
+                    </LinearLayout>
+
+                </LinearLayout>
 
             </LinearLayout>
+
+
         </LinearLayout>
 
     </ScrollView>
 
-    <android.support.design.widget.FloatingActionButton
+    <ImageButton
         android:id="@+id/bLogout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_logout"
+        android:padding="10dp"
+        android:src="@drawable/ic_logout"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>
