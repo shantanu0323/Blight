@@ -296,4 +296,23 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    
+    <Button
+        android:id="@+id/bHelpMe"
+        android:textAllCaps="false"
+        android:background="@drawable/bg_help_me"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="Help Me"
+        app:layout_constraintBottom_toBottomOf="@+id/map"
+        android:textColor="#e4ed40"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:drawablePadding="5dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:drawableLeft="@drawable/ic_help_me"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="15dp"
+        android:elevation="4dp"/>
+
 </android.support.constraint.ConstraintLayout>

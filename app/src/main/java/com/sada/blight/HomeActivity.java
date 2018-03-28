@@ -4,11 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -18,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -29,6 +33,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -63,6 +68,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Animation blinkAnimation;
     private String alertTitle;
     private String alertMessage;
+    private Button bHelpMe;
+    private View snackbarView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,18 +95,76 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        Bundle locationDetails = fetchLocation();
+
+        bHelpMe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                snackbarView = getCurrentFocus();
+                final Bundle locationDetails = fetchLocation();
+                DatabaseReference currentUser = FirebaseDatabase.getInstance().getReference().child("users")
+                        .child(mAuth.getCurrentUser().getUid());
+                currentUser.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.hasChild("contact")) {
+                            String contact = dataSnapshot.child("contact").getValue().toString();
+                            DatabaseReference alertRef = FirebaseDatabase.getInstance().getReference().child("alerts");
+
+                            HashMap<String, String> alertMap = new HashMap<String, String>();
+                            alertMap.put("location", locationDetails.getString("location"));
+                            alertMap.put("lat", locationDetails.getString("lat"));
+                            alertMap.put("lon", locationDetails.getString("lon"));
+                            alertMap.put("contact", contact);
+
+                            alertRef.child(mAuth.getCurrentUser().getUid()).setValue(alertMap)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Snackbar.make(findViewById(R.id.bHelpMe),
+                                                    "Alert has been sent to the Authority, Stay put we will be there soon",
+                                                    Snackbar.LENGTH_LONG).show();
+                                            bHelpMe.setText("Approaching you");
+                                            bHelpMe.setClickable(false);
+                                            bHelpMe.setTextSize(20f);
+                                            Drawable img = getResources().getDrawable( R.drawable.ic_approching );
+                                            bHelpMe.setCompoundDrawablesWithIntrinsicBounds( img, null, null, null);
+                                            bHelpMe.setBackground(getResources().getDrawable(R.drawable.bg_approaching));
+                                            bHelpMe.setTextColor(Color.rgb(20,150,80));
+                                            Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim
+                                                    .blink);
+                                            bHelpMe.startAnimation(animation);
+
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
+    }
+
+    private Bundle fetchLocation() {
+        Bundle locationDetails = new Bundle();
         GPSTracker gps = new GPSTracker(HomeActivity.this);
         if (gps.canGetLocation()) {
             String output = "";
             lat = gps.getLatitude();
             lon = gps.getLongitude();
+            locationDetails.putString("lat", lat + "");
+            locationDetails.putString("lon", lon + "");
             Geocoder geocoder = new Geocoder(this, Locale.getDefault());
             location = "";
             try {
                 List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
-//                Toast.makeText(getApplicationContext(), "" + (addresses.get(0).getAddressLine(0) == null), Toast.LENGTH_SHORT).show();
                 Address obj = addresses.get(0);//.getAddressLine(0);
                 location = obj.getLocality();
+                locationDetails.putString("location", location);
                 QUERY_URL = BASE_URL + location;
                 initiateLoader();
                 Toast.makeText(getApplicationContext(), location, Toast.LENGTH_SHORT).show();
@@ -115,6 +180,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 e.printStackTrace();
             }
         }
+        return locationDetails;
     }
 
     private void operationAlert() {
@@ -137,6 +203,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         tvHumidity = findViewById(R.id.tvHumidity);
         tvVisibility = findViewById(R.id.tvVisibility);
         dataContainer = findViewById(R.id.dataContainer);
+        bHelpMe = findViewById(R.id.bHelpMe);
     }
 
     private void initiateLoader() {
@@ -234,11 +301,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         weatherData = QueryUtils.extractFeatureFromJson(data);
 //        Toast.makeText(getApplicationContext(), "" + weatherData.getForPD3(), Toast.LENGTH_SHORT).show();
         try {
-            tvTemp.setText((weatherData.getTemp().toString().substring(0,2)));
-            tvPressure.setText(weatherData.getPressure().toString().substring(0,4));
-            tvHumidity.setText(weatherData.getHumidity().toString().substring(0,3));
-            tvVisibility.setText(weatherData.getVisibility().toString().substring(0,3));
-            tvWind.setText(weatherData.getWind().toString().substring(0,3));
+            tvTemp.setText((weatherData.getTemp().toString().substring(0, 2)));
+            tvPressure.setText(weatherData.getPressure().toString().substring(0, 4));
+            tvHumidity.setText(weatherData.getHumidity().toString().substring(0, 3));
+            tvVisibility.setText(weatherData.getVisibility().toString().substring(0, 3));
+            tvWind.setText(weatherData.getWind().toString().substring(0, 3));
         } catch (Exception e) {
             e.printStackTrace();
         }
