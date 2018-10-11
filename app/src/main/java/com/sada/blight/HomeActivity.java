@@ -92,6 +92,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_home);
 
         findViews();
+        bCancelAlert.setVisibility(View.GONE);
+        bHelpMe.setVisibility(View.GONE);
         mAuth = FirebaseAuth.getInstance();
         final String title, message;
         showAlert = getIntent().getBooleanExtra("showAlert", false);
@@ -108,12 +110,12 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
-                    Toast.makeText(HomeActivity.this, "ADDED", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(HomeActivity.this, "ADDED", Toast.LENGTH_SHORT).show();
                     operationAlert(title, message, true);
                 } else {
 //                    alertContainer.setVisibility(View.GONE);
                     operationAlert(title, message, false);
-                    Toast.makeText(HomeActivity.this, "DELETED", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(HomeActivity.this, "DELETED", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -207,11 +209,9 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .blink);
                     bHelpMe.startAnimation(animation);
                     bCancelAlert.setVisibility(View.VISIBLE);
+                    bHelpMe.setVisibility(View.VISIBLE);
                 } else {
                     bCancelAlert.setVisibility(View.GONE);
-                    Snackbar.make(findViewById(R.id.bHelpMe),
-                            "Alert has been terminated",
-                            Snackbar.LENGTH_LONG).show();
                     bHelpMe.setText("Help Me");
                     bHelpMe.setClickable(true);
                     bHelpMe.setTextSize(20f);
@@ -221,6 +221,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     bHelpMe.setTextColor(Color.rgb(228, 237, 64));
                     Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
                     bHelpMe.startAnimation(animation);
+                    bHelpMe.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -234,6 +235,9 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 alertRef.child(mAuth.getCurrentUser().getUid()).removeValue();
+                Snackbar.make(findViewById(R.id.bHelpMe),
+                        "Alert has been terminated",
+                        Snackbar.LENGTH_LONG).show();
             }
         });
     }
