@@ -1,8 +1,11 @@
 package com.sada.blight;
 
+import android.*;
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -14,6 +17,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +31,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -52,6 +65,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final String TAG = "HomeActivity";
     private static final int LOADER_ID = 2;
+    private static final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 24;
+    private static final int REQUEST_CHECK_SETTINGS = 21;
     private FirebaseAuth mAuth;
     private GoogleMap mMap;
     private String location;
@@ -77,11 +92,36 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_home);
 
         findViews();
-
+        mAuth = FirebaseAuth.getInstance();
+        final String title, message;
         showAlert = getIntent().getBooleanExtra("showAlert", false);
         if (showAlert) {
-            operationAlert();
+            title = (getIntent().getStringExtra("title")).substring(5);
+            message = getIntent().getStringExtra("message");
+            ;
+        } else {
+            title = "Earthquake Alert";
+            message = "Alert has been issued in your area, Stay careful";
         }
+        DatabaseReference alertedUsersRef = FirebaseDatabase.getInstance().getReference().child("alerted_users");
+        alertedUsersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
+                    Toast.makeText(HomeActivity.this, "ADDED", Toast.LENGTH_SHORT).show();
+                    operationAlert(title, message, true);
+                } else {
+//                    alertContainer.setVisibility(View.GONE);
+                    operationAlert(title, message, false);
+                    Toast.makeText(HomeActivity.this, "DELETED", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         ((ImageButton) findViewById(R.id.bLogout)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -127,10 +167,10 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             bHelpMe.setText("Approaching you");
                                             bHelpMe.setClickable(false);
                                             bHelpMe.setTextSize(20f);
-                                            Drawable img = getResources().getDrawable( R.drawable.ic_approching );
-                                            bHelpMe.setCompoundDrawablesWithIntrinsicBounds( img, null, null, null);
+                                            Drawable img = getResources().getDrawable(R.drawable.ic_approching);
+                                            bHelpMe.setCompoundDrawablesWithIntrinsicBounds(img, null, null, null);
                                             bHelpMe.setBackground(getResources().getDrawable(R.drawable.bg_approaching));
-                                            bHelpMe.setTextColor(Color.rgb(20,150,80));
+                                            bHelpMe.setTextColor(Color.rgb(20, 150, 80));
                                             Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim
                                                     .blink);
                                             bHelpMe.startAnimation(animation);
@@ -183,14 +223,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         return locationDetails;
     }
 
-    private void operationAlert() {
-        alertTitle = getIntent().getStringExtra("title");
-        alertTitle = alertTitle.substring(5);
-        alertMessage = getIntent().getStringExtra("message");
+    private void operationAlert(String alertTitle, String alertMessage, boolean showAlert) {
         ((TextView) findViewById(R.id.tvAlertTitle)).setText(alertTitle);
         ((TextView) findViewById(R.id.tvAlertMessage)).setText(alertMessage);
 
-        alertContainer.setVisibility(View.VISIBLE);
+        alertContainer.setVisibility(showAlert ? View.VISIBLE : View.GONE);
         blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
         alertContainer.startAnimation(blinkAnimation);
     }
@@ -270,20 +307,73 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         mMap = googleMap;
-        mMap.setMyLocationEnabled(true);
-        // Add a marker in Sydney and move the camera
-        LatLng position = new LatLng(lat, lon);
-        mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
-        position = new LatLng(lat - 0.001d, lon - 0.001);
-        mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
-        position = new LatLng(lat + 0.003d, lon + 0.0015);
-        mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
-        position = new LatLng(lat - 0.004d, lon - 0.006);
-        mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
-        position = new LatLng(lat + 0.001d, lon + 0.003);
-        mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15.0f));
+
+        if (ContextCompat.checkSelfPermission(HomeActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            ActivityCompat.requestPermissions(HomeActivity.this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    MY_PERMISSIONS_ACCESS_COARSE_LOCATION);
+
+        } else {
+
+            displayLocationSettingsRequest(this);
+            mMap.setMyLocationEnabled(true);
+            // Add a marker in Sydney and move the camera
+            LatLng position = new LatLng(lat, lon);
+            mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+            position = new LatLng(lat - 0.001d, lon - 0.001);
+            mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+            position = new LatLng(lat + 0.003d, lon + 0.0015);
+            mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+            position = new LatLng(lat - 0.004d, lon - 0.006);
+            mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+            position = new LatLng(lat + 0.001d, lon + 0.003);
+            mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15.0f));
+        }
+    }
+
+    private void displayLocationSettingsRequest(Context context) {
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(LocationServices.API).build();
+        googleApiClient.connect();
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(10000 / 2);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+
+        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        Log.i(TAG, "All location settings are satisfied.");
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
+
+                        try {
+                            // Show the dialog by calling startResolutionForResult(), and check the result
+                            // in onActivityResult().
+                            status.startResolutionForResult(HomeActivity.this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            Log.i(TAG, "PendingIntent unable to execute request.");
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
+                        break;
+                }
+            }
+        });
     }
 
     @Override
@@ -316,4 +406,45 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onLoaderReset(Loader<String> loader) {
 
     }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_ACCESS_COARSE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    mMap.setMyLocationEnabled(true);
+                    // Add a marker in Sydney and move the camera
+                    LatLng position = new LatLng(lat, lon);
+                    mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+                    position = new LatLng(lat - 0.001d, lon - 0.001);
+                    mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+                    position = new LatLng(lat + 0.003d, lon + 0.0015);
+                    mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+                    position = new LatLng(lat - 0.004d, lon - 0.006);
+                    mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+                    position = new LatLng(lat + 0.001d, lon + 0.003);
+                    mMap.addMarker(new MarkerOptions().position(position).title("Marker in " + location));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15.0f));
+                } else {
+                    Toast.makeText(getApplicationContext(), "This application requires the access to location in order to function", Toast.LENGTH_LONG).show();
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+        }
+    }
+
 }
