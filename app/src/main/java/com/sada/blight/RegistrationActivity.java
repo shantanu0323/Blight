@@ -258,6 +258,9 @@ public class RegistrationActivity extends AppCompatActivity {
                                 userMap.put("location", user.getLocation());
 
                                 currentUser.setValue(userMap);
+
+                                DatabaseReference locationRef = FirebaseDatabase.getInstance().getReference().child("locations").child(location);
+                                locationRef.child(userId).setValue(user.getDevice_token());
                                 progressDialog.dismiss();
 
                                 Log.e(TAG, "onComplete: Redirecting to HomeActivity");

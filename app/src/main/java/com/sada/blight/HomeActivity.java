@@ -83,7 +83,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Animation blinkAnimation;
     private String alertTitle;
     private String alertMessage;
-    private Button bHelpMe;
+    private Button bHelpMe, bCancelAlert;
     private View snackbarView;
 
     @Override
@@ -187,6 +187,55 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 });
             }
         });
+
+        final DatabaseReference alertRef = FirebaseDatabase.getInstance().getReference().child("alerts");
+        alertRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
+                    Snackbar.make(findViewById(R.id.bHelpMe),
+                            "Alert has been sent to the Authority, Stay put we will be there soon",
+                            Snackbar.LENGTH_LONG).show();
+                    bHelpMe.setText("Approaching you");
+                    bHelpMe.setClickable(false);
+                    bHelpMe.setTextSize(20f);
+                    Drawable img = getResources().getDrawable(R.drawable.ic_approching);
+                    bHelpMe.setCompoundDrawablesWithIntrinsicBounds(img, null, null, null);
+                    bHelpMe.setBackground(getResources().getDrawable(R.drawable.bg_approaching));
+                    bHelpMe.setTextColor(Color.rgb(20, 150, 80));
+                    Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim
+                            .blink);
+                    bHelpMe.startAnimation(animation);
+                    bCancelAlert.setVisibility(View.VISIBLE);
+                } else {
+                    bCancelAlert.setVisibility(View.GONE);
+                    Snackbar.make(findViewById(R.id.bHelpMe),
+                            "Alert has been terminated",
+                            Snackbar.LENGTH_LONG).show();
+                    bHelpMe.setText("Help Me");
+                    bHelpMe.setClickable(true);
+                    bHelpMe.setTextSize(20f);
+                    Drawable img = getResources().getDrawable(R.drawable.ic_help_me);
+                    bHelpMe.setCompoundDrawablesWithIntrinsicBounds(img, null, null, null);
+                    bHelpMe.setBackground(getResources().getDrawable(R.drawable.bg_help_me));
+                    bHelpMe.setTextColor(Color.rgb(228, 237, 64));
+                    Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
+                    bHelpMe.startAnimation(animation);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        bCancelAlert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertRef.child(mAuth.getCurrentUser().getUid()).removeValue();
+            }
+        });
     }
 
     private Bundle fetchLocation() {
@@ -241,6 +290,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         tvVisibility = findViewById(R.id.tvVisibility);
         dataContainer = findViewById(R.id.dataContainer);
         bHelpMe = findViewById(R.id.bHelpMe);
+        bCancelAlert = findViewById(R.id.bCancelAlert);
     }
 
     private void initiateLoader() {

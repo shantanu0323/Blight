@@ -107,9 +107,9 @@
                             android:textSize="22sp" />
 
                         <LinearLayout
-                            android:layout_weight="1"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent">
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
 
                             <TextView
                                 android:id="@+id/tvPressure"
@@ -125,12 +125,12 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:text="mbs"
+                                android:layout_weight="3"
                                 android:gravity="bottom"
                                 android:paddingBottom="10dp"
-                                android:textSize="18sp"
-                                android:layout_weight="3"
-                                android:textColor="#888"/>
+                                android:text="mbs"
+                                android:textColor="#888"
+                                android:textSize="18sp" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -153,9 +153,9 @@
                             android:textSize="22sp" />
 
                         <LinearLayout
-                            android:layout_weight="1"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent">
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
 
                             <TextView
                                 android:id="@+id/tvHumidity"
@@ -171,12 +171,12 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:text="out of 1"
+                                android:layout_weight="3"
                                 android:gravity="bottom"
                                 android:paddingBottom="10dp"
-                                android:textSize="18sp"
-                                android:layout_weight="3"
-                                android:textColor="#888"/>
+                                android:text="out of 1"
+                                android:textColor="#888"
+                                android:textSize="18sp" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -204,9 +204,9 @@
                         android:textSize="22sp" />
 
                     <LinearLayout
-                        android:layout_weight="1"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
 
                         <TextView
                             android:id="@+id/tvVisibility"
@@ -222,12 +222,12 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="km"
+                            android:layout_weight="3"
                             android:gravity="bottom"
                             android:paddingBottom="10dp"
-                            android:textSize="18sp"
-                            android:layout_weight="3"
-                            android:textColor="#888"/>
+                            android:text="km"
+                            android:textColor="#888"
+                            android:textSize="18sp" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -249,9 +249,9 @@
                         android:textSize="22sp" />
 
                     <LinearLayout
-                        android:layout_weight="1"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
 
                         <TextView
                             android:id="@+id/tvWind"
@@ -267,12 +267,12 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="km / hr"
+                            android:layout_weight="3"
                             android:gravity="bottom"
                             android:paddingBottom="10dp"
-                            android:textSize="18sp"
-                            android:layout_weight="3"
-                            android:textColor="#888"/>
+                            android:text="km / hr"
+                            android:textColor="#888"
+                            android:textSize="18sp" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -296,23 +296,41 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    
+
     <Button
         android:id="@+id/bHelpMe"
-        android:textAllCaps="false"
-        android:background="@drawable/bg_help_me"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:text="Help Me"
-        app:layout_constraintBottom_toBottomOf="@+id/map"
-        android:textColor="#e4ed40"
+        android:layout_marginBottom="15dp"
+        android:layout_marginStart="15dp"
+        android:background="@drawable/bg_help_me"
+        android:drawableLeft="@drawable/ic_help_me"
+        android:drawablePadding="5dp"
+        android:elevation="4dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:drawablePadding="5dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:drawableLeft="@drawable/ic_help_me"
-        android:layout_marginStart="15dp"
+        android:text="Help Me"
+        android:textAllCaps="false"
+        android:textColor="#e4ed40"
+        app:layout_constraintBottom_toBottomOf="@+id/map"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <Button
+        android:id="@+id/bCancelAlert"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
         android:layout_marginBottom="15dp"
-        android:elevation="4dp"/>
+        android:layout_marginEnd="15dp"
+        android:background="@drawable/bg_cancel_alert"
+        android:drawableLeft="@drawable/ic_help_me"
+        android:drawablePadding="5dp"
+        android:elevation="4dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="I'm OK"
+        android:textAllCaps="false"
+        android:textColor="#e4ed40"
+        app:layout_constraintBottom_toBottomOf="@+id/map"
+        app:layout_constraintRight_toRightOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
