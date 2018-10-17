@@ -98,27 +98,34 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         bCancelAlert.setVisibility(View.GONE);
         bHelpMe.setVisibility(View.GONE);
         mAuth = FirebaseAuth.getInstance();
-        final String title, message;
-        showAlert = getIntent().getBooleanExtra("showAlert", false);
-        if (showAlert) {
-            title = (getIntent().getStringExtra("title")).substring(5);
-            message = getIntent().getStringExtra("message");
-            ;
-        } else {
-            title = "Earthquake Alert";
-            message = "Alert has been issued in your area, Stay careful";
-        }
+//        final String title, message;
+//        showAlert = getIntent().getBooleanExtra("showAlert", false);
+//        if (showAlert) {
+//            title = (getIntent().getStringExtra("title")).substring(5);
+//            message = getIntent().getStringExtra("message");
+//        } else {
+//            title = "Earthquake Alert";
+//            message = "Alert has been issued in your area, Stay careful";
+//        }
         DatabaseReference alertedUsersRef = FirebaseDatabase.getInstance().getReference().child("alerted_users");
         alertedUsersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                String message = "Alert has been issued in your area, Stay careful";
                 if (dataSnapshot.hasChild(mAuth.getCurrentUser().getUid())) {
 //                    Toast.makeText(HomeActivity.this, "ADDED", Toast.LENGTH_SHORT).show();
+                    String title = "Earthquake";
+                    try {
+                        title = dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("alert_type").getValue().toString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     operationAlert(title, message, true);
                 } else {
-//                    alertContainer.setVisibility(View.GONE);
-                    operationAlert(title, message, false);
 //                    Toast.makeText(HomeActivity.this, "DELETED", Toast.LENGTH_SHORT).show();
+                    alertContainer.setVisibility(View.GONE);
+                    String title = "Earthquake";
+//                    operationAlert(title, message, false);
                 }
             }
 
@@ -180,8 +187,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                     .blink);
                                             bHelpMe.startAnimation(animation);
 
-                                            // Log the alert to the help_requests
-                                            DatabaseReference helpRequestsRef = FirebaseDatabase.getInstance().getReference().child("help_requests");
+                                            // Log the alert to the help_requests_log
+                                            DatabaseReference helpRequestsRef = FirebaseDatabase.getInstance().getReference().child("help_requests_log");
                                             Calendar calendar = Calendar.getInstance();
                                             Long currentTimeInMillis = calendar.getTimeInMillis();
                                             String loggingKey = "millis_" + currentTimeInMillis;
@@ -294,7 +301,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void operationAlert(String alertTitle, String alertMessage, boolean showAlert) {
-        ((TextView) findViewById(R.id.tvAlertTitle)).setText(alertTitle);
+        ((TextView) findViewById(R.id.tvAlertTitle)).setText(alertTitle + " alert");
         ((TextView) findViewById(R.id.tvAlertMessage)).setText(alertMessage);
 
         alertContainer.setVisibility(showAlert ? View.VISIBLE : View.GONE);
