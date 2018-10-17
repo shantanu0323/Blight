@@ -195,7 +195,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             Date date = calendar.getTime();
                                             SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
                                             String dateStr = sdf.format(date);
-                                            sdf = new SimpleDateFormat("hh:mm:ss");
+                                            sdf = new SimpleDateFormat("HH:mm:ss");
                                             String timeStr = sdf.format(date);
                                             alertMap.put("date", dateStr);
                                             alertMap.put("time", timeStr);
