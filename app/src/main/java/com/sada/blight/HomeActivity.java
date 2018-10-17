@@ -55,7 +55,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -153,7 +156,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                             String contact = dataSnapshot.child("contact").getValue().toString();
                             DatabaseReference alertRef = FirebaseDatabase.getInstance().getReference().child("alerts");
 
-                            HashMap<String, String> alertMap = new HashMap<String, String>();
+                            final HashMap<String, String> alertMap = new HashMap<String, String>();
                             alertMap.put("location", locationDetails.getString("location"));
                             alertMap.put("lat", locationDetails.getString("lat"));
                             alertMap.put("lon", locationDetails.getString("lon"));
@@ -177,6 +180,20 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                     .blink);
                                             bHelpMe.startAnimation(animation);
 
+                                            // Log the alert to the help_requests
+                                            DatabaseReference helpRequestsRef = FirebaseDatabase.getInstance().getReference().child("help_requests");
+                                            Calendar calendar = Calendar.getInstance();
+                                            Long currentTimeInMillis = calendar.getTimeInMillis();
+                                            String loggingKey = "millis_" + currentTimeInMillis;
+                                            Date date = calendar.getTime();
+                                            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
+                                            String dateStr = sdf.format(date);
+                                            sdf = new SimpleDateFormat("hh:mm:ss");
+                                            String timeStr = sdf.format(date);
+                                            alertMap.put("date", dateStr);
+                                            alertMap.put("time", timeStr);
+                                            alertMap.put("uid", mAuth.getCurrentUser().getUid());
+                                            helpRequestsRef.child(loggingKey).setValue(alertMap);
                                         }
                                     });
                         }
