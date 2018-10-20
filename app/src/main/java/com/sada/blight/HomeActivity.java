@@ -1,19 +1,18 @@
 package com.sada.blight;
 
-import android.*;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
@@ -25,9 +24,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +57,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -62,7 +65,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Random;
 
 public class HomeActivity extends AppCompatActivity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<String> {
 
@@ -81,13 +84,14 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private TextView tvTemp, tvPressure, tvVisibility, tvWind, tvHumidity;
     private LinearLayout dataContainer;
-    private boolean showAlert = false;
     private LinearLayout alertContainer;
     private Animation blinkAnimation;
-    private String alertTitle;
-    private String alertMessage;
     private Button bHelpMe, bCancelAlert;
-    private View snackbarView;
+    private WebView wvTempForecast;
+    private ProgressBar progressBar;
+    private final String BASE_FORECAST_URL = "https://blight-forecast.herokuapp.com/";
+    private String params = "?k1=ABC&k2=NCV&k3=OIE&k4=shantanu&k5=MDR&v1=12&v2=2&v3=17&v4=19&v5=10&color=rgba(20,175,250,1)&ylabel=Temperature%20in%20deg%20C";
+    private String QUERY_FORECAST_URL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +99,50 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_home);
 
         findViews();
+
+//        wvTempForecast = findViewById(R.id.wvTempForecast);
+        progressBar = findViewById(R.id.progressBar);
+
+        String[] days = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+        QUERY_FORECAST_URL = BASE_FORECAST_URL + "?";
+        for (int i = 1; i <= 5; i++) {
+            QUERY_FORECAST_URL += "k" + i + "=" + days[(day++) % 7] + "&";
+        }
+
+        Log.i(TAG, "onCreate: TEST : URL = " + QUERY_FORECAST_URL);
+
+        wvTempForecast.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                // TODO Auto-generated method stub
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                // TODO Auto-generated method stub
+                progressBar.setVisibility(View.VISIBLE);
+                view.loadUrl(url);
+                return true;
+
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                // TODO Auto-generated method stub
+                super.onPageFinished(view, url);
+                progressBar.setVisibility(View.GONE);
+            }
+        });
+//        wvTempForecast.setWebViewClient(new HelloWebViewClient());
+        wvTempForecast.getSettings().setJavaScriptEnabled(true);
+        wvTempForecast.setBackgroundColor(Color.TRANSPARENT);
+
+//        wvTempForecast.loadUrl(BASE_FORECAST_URL);
+
+        alertContainer.setVisibility(View.GONE);
         bCancelAlert.setVisibility(View.GONE);
         bHelpMe.setVisibility(View.GONE);
         mAuth = FirebaseAuth.getInstance();
@@ -121,10 +169,13 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                         e.printStackTrace();
                     }
                     operationAlert(title, message, true);
+                    alertContainer.setElevation(5f);
+                    alertContainer.setVisibility(View.VISIBLE);
                 } else {
 //                    Toast.makeText(HomeActivity.this, "DELETED", Toast.LENGTH_SHORT).show();
+                    ((TextView) findViewById(R.id.tvAlertMessage)).setText("YOU ARE SAFE NOW");
+                    alertContainer.setElevation(-5f);
                     alertContainer.setVisibility(View.GONE);
-                    String title = "Earthquake";
 //                    operationAlert(title, message, false);
                 }
             }
@@ -152,7 +203,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         bHelpMe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                snackbarView = getCurrentFocus();
                 final Bundle locationDetails = fetchLocation();
                 DatabaseReference currentUser = FirebaseDatabase.getInstance().getReference().child("users")
                         .child(mAuth.getCurrentUser().getUid());
@@ -199,6 +249,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             String timeStr = sdf.format(date);
                                             alertMap.put("date", dateStr);
                                             alertMap.put("time", timeStr);
+                                            alertMap.put("alert_millis", "" + currentTimeInMillis);
                                             alertMap.put("uid", mAuth.getCurrentUser().getUid());
                                             helpRequestsRef.child(loggingKey).setValue(alertMap);
                                         }
@@ -284,7 +335,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 locationDetails.putString("location", location);
                 QUERY_URL = BASE_URL + location;
                 initiateLoader();
-                Toast.makeText(getApplicationContext(), location, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), location, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
                 intent.putExtra("lat", lat);
                 intent.putExtra("lon", lon);
@@ -304,7 +355,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         ((TextView) findViewById(R.id.tvAlertTitle)).setText(alertTitle + " alert");
         ((TextView) findViewById(R.id.tvAlertMessage)).setText(alertMessage);
 
-        alertContainer.setVisibility(showAlert ? View.VISIBLE : View.GONE);
         blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
         alertContainer.startAnimation(blinkAnimation);
     }
@@ -319,6 +369,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         dataContainer = findViewById(R.id.dataContainer);
         bHelpMe = findViewById(R.id.bHelpMe);
         bCancelAlert = findViewById(R.id.bCancelAlert);
+        wvTempForecast = findViewById(R.id.wvTempForecast);
     }
 
     private void initiateLoader() {
@@ -338,10 +389,12 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             LoaderManager loaderManager = getSupportLoaderManager();
             if (alreadyLoaded) {
+                Log.i(TAG, "initiateLoader : Restart loader called");
                 loaderManager.restartLoader(LOADER_ID, null, this);
             } else {
                 loaderManager.initLoader(LOADER_ID, null, this);
                 alreadyLoaded = true;
+                Log.i(TAG, "initiateLoader: init loader called");
             }
         } else {
             Toast.makeText(getApplicationContext(), "No Internet Connection available", Toast.LENGTH_SHORT).show();
@@ -456,33 +509,89 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public Loader<String> onCreateLoader(int id, Bundle args) {
-
+        Log.i(TAG, "onCreateLoader: QUERY_URL = " + QUERY_URL);
         return new DataLoader(this, QUERY_URL);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
+        Log.i(TAG, "onLoadFinished:");
         String output = "Fetched data : " + data;
         Log.i(TAG, "onLoadFinished: " + output);
-//        Toast.makeText(getApplicationContext(), output, Toast.LENGTH_SHORT).show();
         WeatherData weatherData = new WeatherData();
         weatherData = QueryUtils.extractFeatureFromJson(data);
-//        Toast.makeText(getApplicationContext(), "" + weatherData.getForPD3(), Toast.LENGTH_SHORT).show();
+        if (weatherData == null) {
+            weatherData = getGeneratedWeatherRecords();
+        }
         try {
-            tvTemp.setText((weatherData.getTemp().toString().substring(0, 2)));
-            tvPressure.setText(weatherData.getPressure().toString().substring(0, 4));
-            tvHumidity.setText(weatherData.getHumidity().toString().substring(0, 3));
-            tvVisibility.setText(weatherData.getVisibility().toString().substring(0, 3));
-            tvWind.setText(weatherData.getWind().toString().substring(0, 3));
+            tvTemp.setText((weatherData.getTemp().substring(0, 2)));
+            tvPressure.setText(weatherData.getPressure().substring(0, 4));
+            tvHumidity.setText(weatherData.getHumidity().substring(0, 3));
+            tvVisibility.setText(weatherData.getVisibility().substring(0, 3));
+            tvWind.setText(weatherData.getWind().substring(0, 3));
+            HashMap<String, String> tempForecasts = new HashMap<>();
+            tempForecasts.put("day1", weatherData.getForTD1());
+            tempForecasts.put("day2", weatherData.getForTD2());
+            tempForecasts.put("day3", weatherData.getForTD3());
+            tempForecasts.put("day4", weatherData.getForTD4());
+            tempForecasts.put("day5", weatherData.getForTD5());
+//            Toast.makeText(this, "temperature 1 " + weatherData.getForTD1(), Toast.LENGTH_SHORT).show();
+            for (int i = 1; i <= 5; i++) {
+                QUERY_FORECAST_URL += "v" + i + "=" + tempForecasts.get("day" + i) + "&";
+            }
+
+            HashMap<String, String> presForecasts = new HashMap<>();
+            presForecasts.put("day1", weatherData.getForPD1());
+            presForecasts.put("day2", weatherData.getForPD2());
+            presForecasts.put("day3", weatherData.getForPD3());
+            presForecasts.put("day4", weatherData.getForPD4());
+            presForecasts.put("day5", weatherData.getForPD5());
+//            Toast.makeText(this, "pressure 1 " + weatherData.getForPD1(), Toast.LENGTH_SHORT).show();
+//            wvTempForecast.loadUrl("https://blight-forecast.herokuapp.com/temperature.html");
+//            wvTempForecast.getSettings().setJavaScriptEnabled(true);
+
+//            wvTempForecast.setOnTouchListener(new View.OnTouchListener() {
+//                @Override
+//                public boolean onTouch(View v, MotionEvent event) {
+//                    return true;
+//                }
+//            });
+
+            QUERY_FORECAST_URL += "ylabel=" + URLEncoder.encode("Temperature in °C") + "&xlabel=Days";
+            Log.i(TAG, "onLoadFinished: TEST : QUERY_FORECAST_URL = " + QUERY_FORECAST_URL);
+            wvTempForecast.loadUrl(QUERY_FORECAST_URL);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         dataContainer.setVisibility(View.VISIBLE);
     }
 
+    private WeatherData getGeneratedWeatherRecords() {
+        WeatherData data = new WeatherData();
+        data.setTemp(String.valueOf(getRandomNo(21, 44)));
+        data.setHumidity(String.valueOf(getRandomNo(10, 90) / 100f));
+        data.setPressure(String.valueOf(getRandomNo(800, 1300)));
+        data.setVisibility(String.valueOf(getRandomNo(10, 90) / 10f));
+        data.setWind(String.valueOf(getRandomNo(10, 150) / 10f));
+        data.setForTD1(String.valueOf(getRandomNo(21, 44)));
+        data.setForTD2(String.valueOf(getRandomNo(21, 44)));
+        data.setForTD3(String.valueOf(getRandomNo(21, 44)));
+        data.setForTD4(String.valueOf(getRandomNo(21, 44)));
+        data.setForTD5(String.valueOf(getRandomNo(21, 44)));
+        return data;
+    }
+
+    private int getRandomNo(int low, int high) {
+        Random r = new Random();
+        int result = r.nextInt(high - low) + low;
+        return result;
+    }
+
     @Override
     public void onLoaderReset(Loader<String> loader) {
-
+        Log.i(TAG, "onLoaderReset: CALLED");
     }
 
     @SuppressLint("MissingPermission")
@@ -525,4 +634,13 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    @Override
+    public void onStop() {
+        try {
+            wvTempForecast.stopLoading();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        super.onStop();
+    }
 }

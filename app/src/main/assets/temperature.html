@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta name = "viewport" content = "width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src= "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"> 
+    <script src="https:www.chatrjs.org/samples/latest/utils.js">
+</script>
+</head>
+<body>
+    
+    <canvas id="myChart" width="300" height="200"></canvas>
+    <script>
+        var ctx = document.getElementById("myChart").getContext('2d');
+        var options = {
+			maintainAspectRatio: false,
+			spanGaps: false,
+			elements: {
+				line: {
+					tension: 0.000001
+				}
+			},
+			plugins: {
+				filler: {
+					propagate: false
+				}
+			},
+			scales: {
+				xAxes: [{
+					ticks: {
+						autoSkip: false,
+						maxRotation: 0
+					}
+				}],
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: 0,
+                        precision: 0.2,
+                        suggestedMax: 50
+                    }
+                }]
+			}
+		};
+
+        var boundary = 'start';
+        var myChart = new Chart(ctx, {
+				type: 'line',
+				data: {
+					labels: ['Apr','May','Jun','Jul','Aug'],
+					datasets: [{
+						backgroundColor: 'rgba(220,50,50,0.5)',
+						borderColor: '#dd5555',
+						data: [25,28,29,27,30],
+                  		label: 'Dataset',
+						fill: boundary
+					}]
+				},
+				options: Chart.helpers.merge(options, {
+					title: {
+						text: 'fill: ' + boundary,
+						display: true
+					}
+				})
+			});
+        Chart.helpers.each(Chart.instances, function(chart) {
+				chart.options.elements.line.tension = 0.4;
+				chart.update();
+			});
+    </script>
+    
+</body>
+</html>
